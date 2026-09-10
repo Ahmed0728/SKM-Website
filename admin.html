@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Admin — SKM</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <link rel="icon" href="assets/icon-white.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+  <div id="login-view" class="admin-login">
+    <img class="hero__mark" src="assets/logo-white.png" alt="SKM" />
+    <h1 class="section__title">Admin</h1>
+    <form class="form" id="login-form">
+      <div class="field">
+        <label for="login-email">Email</label>
+        <input type="email" id="login-email" required autocomplete="username" />
+      </div>
+      <div class="field">
+        <label for="login-password">Password</label>
+        <input type="password" id="login-password" required autocomplete="current-password" />
+      </div>
+      <div>
+        <button type="submit" class="btn form__submit" id="login-btn">Sign In</button>
+        <p class="form__status" id="login-status"></p>
+      </div>
+    </form>
+  </div>
+
+  <div id="dashboard-view" class="admin-shell" hidden>
+    <div class="admin-maxw">
+      <div class="admin-header">
+        <h1>Members</h1>
+        <button class="btn btn--ghost" id="signout-btn">Sign Out</button>
+      </div>
+
+      <div class="admin-stats" id="stats"></div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Contact</th>
+              <th>Referred by</th>
+              <th>Message</th>
+              <th>Status</th>
+              <th>Notes</th>
+              <th>Applied</th>
+            </tr>
+          </thead>
+          <tbody id="members-body"></tbody>
+        </table>
+        <div class="empty-state" id="empty-state" hidden>No applications yet.</div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script src="js/supabase-config.js"></script>
+  <script src="js/admin.js"></script>
+</body>
+</html>
