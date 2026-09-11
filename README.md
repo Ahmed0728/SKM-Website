@@ -59,19 +59,25 @@ schema are what actually control who can see/change what.
 ## 3b. Payment — $35/month membership
 
 Approved members hit a payment screen before they can set up their
-profile or access the portal. Setup, one time:
+profile or access the portal. This is built and wired in
+(`STRIPE_PAYMENT_LINK` in [`js/supabase-config.js`](js/supabase-config.js)),
+but currently pointed at a **test-mode** Stripe Payment Link — it works
+end-to-end with Stripe's test cards but can't take a real charge yet,
+because the Stripe account (Say Know More Group) hasn't completed
+business verification.
 
-1. Create a free [Stripe](https://stripe.com) account.
-2. In the Stripe Dashboard, go to **Payment links → Create payment link**.
-3. Create a product: name it something like "SKM Membership", price
-   **$35.00**, billing period **Monthly** (recurring).
-4. Once created, copy the payment link URL (looks like
-   `https://buy.stripe.com/xxxxx`).
-5. Paste it into `STRIPE_PAYMENT_LINK` in
-   [`js/supabase-config.js`](js/supabase-config.js).
+**To go live:**
+1. In the Stripe Dashboard, click **Verify your business** (top right) and
+   complete it — legal business info + a bank account for payouts. Only
+   you can do this step, it's your business/banking info.
+2. Once verified, switch off "Sandbox" mode (top left) and repeat the
+   payment link setup in **live** mode: Payment links → Create payment
+   link → Product "SKM Membership", $35.00, Monthly recurring.
+3. Copy that live link (`https://buy.stripe.com/xxxxx`, no `test_` in it)
+   into `STRIPE_PAYMENT_LINK`, replacing the test one.
 
-That's it — no other code changes needed. The member's email is
-pre-filled on the Stripe checkout page automatically.
+The member's email is pre-filled on the Stripe checkout page
+automatically either way.
 
 **How confirmation works right now:** this is a static site with no
 backend server, so payment confirmation is manual — Stripe's dashboard
