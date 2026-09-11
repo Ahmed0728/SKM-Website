@@ -4,11 +4,12 @@ Static site (no build step, plain HTML/CSS/JS) backed by
 [Supabase](https://supabase.com) (free tier). Three parts:
 
 - **Public site** (`index.html`) — About + membership application form
-- **Member portal** (`member.html`) — magic-link login → events, member
-  directory, merch preview (once approved)
+- **Member portal** (`member.html`) — email/password login → approval →
+  $35/month payment → profile setup → events, member directory, merch
+  preview
 - **Admin panel** (`admin.html`) — review applications, manage the member
-  roster, post events, approve suggested matches, import an existing
-  contact list
+  roster (including payment status), post events, approve suggested
+  matches, import an existing contact list
 
 ## 1. Set up the database
 
@@ -33,10 +34,9 @@ schema are what actually control who can see/change what.
    ```
    (This works because the schema auto-creates a `profiles` row the moment
    any auth user is created.)
-3. Under **Authentication → Settings**, you can leave sign-ups on — that's
-   how members create their portal login — but if you'd rather gate it
-   further, magic-link sign-in only requires an existing email, no
-   separate "sign-up" toggle to worry about.
+3. Under **Authentication → Settings**, "Confirm email" should be off —
+   that's what lets a new member get instant access after creating an
+   account, instead of waiting on a confirmation email.
 4. Sign in at `/admin.html` with that email + password.
 
 ## 3. How membership approval works
@@ -44,15 +44,47 @@ schema are what actually control who can see/change what.
 - Someone applies via the public form → lands in the **Applications** tab
   in admin, status `new`.
 - You review it and set status to `approved` (or `declined`/`contacted`).
-- When that person later visits `/member.html` and signs in with a magic
-  link (just their email, no password), the database automatically
-  matches their email against approved applications and unlocks portal
-  access. If there's no match yet, they see a "pending approval" screen —
-  you can also manually flag someone approved in the admin **Members** tab.
+- That person visits `/member.html` and creates an account (email +
+  password — first visit only, then it's a normal login). The database
+  automatically matches their email against approved applications and
+  unlocks the next step. If there's no match yet, they see a "pending
+  approval" screen — you can also manually flag someone approved in the
+  admin **Members** tab.
 - **Bulk-importing an existing list**: use the CSV importer in the admin
   **Applications** tab (columns: `name`, `email`, `company` — header row
   required). Imported rows land as pre-approved applications, so those
-  people get instant portal access the first time they sign in.
+  people get instant portal access the first time they sign in (still
+  gated by payment — see below).
+
+## 3b. Payment — $35/month membership
+
+Approved members hit a payment screen before they can set up their
+profile or access the portal. Setup, one time:
+
+1. Create a free [Stripe](https://stripe.com) account.
+2. In the Stripe Dashboard, go to **Payment links → Create payment link**.
+3. Create a product: name it something like "SKM Membership", price
+   **$35.00**, billing period **Monthly** (recurring).
+4. Once created, copy the payment link URL (looks like
+   `https://buy.stripe.com/xxxxx`).
+5. Paste it into `STRIPE_PAYMENT_LINK` in
+   [`js/supabase-config.js`](js/supabase-config.js).
+
+That's it — no other code changes needed. The member's email is
+pre-filled on the Stripe checkout page automatically.
+
+**How confirmation works right now:** this is a static site with no
+backend server, so payment confirmation is manual — Stripe's dashboard
+shows you every payment in real time, and you check the **Paid** box for
+that person in the admin **Members** tab. The member sees an "Already
+paid? Check again" button on their end that re-checks their status.
+
+**Fast-follow, once this is live and working:** fully automatic
+confirmation needs a small serverless function that listens for Stripe's
+`checkout.session.completed` webhook and flips `payment_status` itself —
+a Supabase Edge Function is the natural place for it. Worth doing once
+you've had a few real members go through the manual flow and confirmed
+it's what you want.
 
 ## 4. Matches / connections
 
