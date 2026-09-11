@@ -10,4 +10,9 @@ const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_
 // Stripe Payment Link for the $35/month membership fee (Stripe Dashboard >
 // Payment links). Safe to be public — it's just a URL, no secret key
 // involved. See README.md for setup steps.
-const STRIPE_PAYMENT_LINK = "";
+//
+// NOTE: this is currently a TEST-mode link (Stripe account not yet
+// verified for live payments — see README "3b. Payment"). It works
+// end-to-end with Stripe's test cards but won't charge anyone for real.
+// Once the account is verified, swap this for the live-mode link.
+const STRIPE_PAYMENT_LINK = "https://buy.stripe.com/test_3cI6oJctI4SY6ok1NE4ko00";
