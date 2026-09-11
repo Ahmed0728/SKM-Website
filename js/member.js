@@ -1,5 +1,6 @@
 const loginView = document.getElementById("login-view");
 const pendingView = document.getElementById("pending-view");
+const paymentView = document.getElementById("payment-view");
 const onboardingView = document.getElementById("onboarding-view");
 const portalView = document.getElementById("portal-view");
 
@@ -18,6 +19,7 @@ let currentProfile = null;
 function show(view) {
   loginView.hidden = view !== "login";
   pendingView.hidden = view !== "pending";
+  paymentView.hidden = view !== "payment";
   onboardingView.hidden = view !== "onboarding";
   portalView.hidden = view !== "portal";
 }
@@ -47,6 +49,15 @@ async function loadProfile(user) {
 
   if (!profile.approved) {
     show("pending");
+    return;
+  }
+
+  if (profile.payment_status !== "active") {
+    const link = document.getElementById("payment-link");
+    link.href = typeof STRIPE_PAYMENT_LINK !== "undefined" && STRIPE_PAYMENT_LINK
+      ? `${STRIPE_PAYMENT_LINK}?prefilled_email=${encodeURIComponent(profile.email)}`
+      : "#";
+    show("payment");
     return;
   }
 
@@ -176,6 +187,29 @@ document.getElementById("pending-signout-btn").addEventListener("click", async (
 document.getElementById("onboard-signout-btn").addEventListener("click", async () => {
   await supabaseClient.auth.signOut();
   show("login");
+});
+
+document.getElementById("payment-signout-btn").addEventListener("click", async () => {
+  await supabaseClient.auth.signOut();
+  show("login");
+});
+
+document.getElementById("payment-refresh-btn").addEventListener("click", async () => {
+  const btn = document.getElementById("payment-refresh-btn");
+  const status = document.getElementById("payment-status");
+  btn.disabled = true;
+  btn.textContent = "Checking…";
+
+  const { data: { session } } = await supabaseClient.auth.getSession();
+  if (session) await loadProfile(session.user);
+
+  btn.disabled = false;
+  btn.textContent = "Already paid? Check again";
+
+  if (currentProfile && currentProfile.payment_status !== "active") {
+    status.textContent = "Not showing as paid yet — payments can take a few minutes to confirm.";
+    status.setAttribute("data-state", "error");
+  }
 });
 
 document.getElementById("signout-btn").addEventListener("click", async () => {
