@@ -54,9 +54,19 @@ async function loadProfile(user) {
 
   if (profile.payment_status !== "active") {
     const link = document.getElementById("payment-link");
-    link.href = typeof STRIPE_PAYMENT_LINK !== "undefined" && STRIPE_PAYMENT_LINK
-      ? `${STRIPE_PAYMENT_LINK}?prefilled_email=${encodeURIComponent(profile.email)}`
-      : "#";
+    const linkReady = typeof STRIPE_PAYMENT_LINK !== "undefined" && STRIPE_PAYMENT_LINK;
+    const paymentStatus = document.getElementById("payment-status");
+    if (linkReady) {
+      link.href = `${STRIPE_PAYMENT_LINK}?prefilled_email=${encodeURIComponent(profile.email)}`;
+      link.removeAttribute("aria-disabled");
+      paymentStatus.textContent = "";
+      paymentStatus.removeAttribute("data-state");
+    } else {
+      link.href = "#";
+      link.setAttribute("aria-disabled", "true");
+      paymentStatus.textContent = "Payment isn't set up yet — try reloading the page, or check back shortly.";
+      paymentStatus.setAttribute("data-state", "error");
+    }
     show("payment");
     return;
   }
@@ -187,6 +197,16 @@ document.getElementById("pending-signout-btn").addEventListener("click", async (
 document.getElementById("onboard-signout-btn").addEventListener("click", async () => {
   await supabaseClient.auth.signOut();
   show("login");
+});
+
+document.getElementById("payment-link").addEventListener("click", (e) => {
+  const link = e.currentTarget;
+  if (link.getAttribute("aria-disabled") === "true") {
+    e.preventDefault();
+    const status = document.getElementById("payment-status");
+    status.textContent = "Payment isn't set up yet — try reloading the page, or check back shortly.";
+    status.setAttribute("data-state", "error");
+  }
 });
 
 document.getElementById("payment-signout-btn").addEventListener("click", async () => {
