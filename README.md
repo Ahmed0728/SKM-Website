@@ -1,109 +1,107 @@
 # SKM — Say Know More
 
-Minimal static site: landing/about + membership application form + a
-password-protected admin dashboard to review applicants. No build step —
-plain HTML/CSS/JS, backed by [Supabase](https://supabase.com) (free tier)
-for storage and admin auth.
+Static site (no build step, plain HTML/CSS/JS) backed by
+[Supabase](https://supabase.com) (free tier). Three parts:
 
-## 1. Set up the backend (Supabase — free)
+- **Public site** (`index.html`) — About + membership application form
+- **Member portal** (`member.html`) — magic-link login → events, member
+  directory, merch preview (once approved)
+- **Admin panel** (`admin.html`) — review applications, manage the member
+  roster, post events, approve suggested matches, import an existing
+  contact list
 
-1. Create a free account at https://supabase.com and a new project.
-2. In the SQL editor, run:
+## 1. Set up the database
 
-```sql
-create table members (
-  id uuid primary key default gen_random_uuid(),
-  name text not null,
-  email text not null,
-  phone text,
-  referral text,
-  message text,
-  status text not null default 'new',
-  notes text,
-  created_at timestamptz not null default now()
-);
+1. Create a free account/project at https://supabase.com.
+2. Open the **SQL editor**, paste in the entire contents of
+   [`supabase-schema.sql`](supabase-schema.sql), and run it. It's safe to
+   re-run if you need to.
+3. Go to **Project Settings → API** and copy the **Project URL** and
+   **anon public** key into [`js/supabase-config.js`](js/supabase-config.js).
 
-alter table members enable row level security;
+The anon key is meant to be public client-side — the RLS policies in the
+schema are what actually control who can see/change what.
 
--- Anyone can submit an application (insert only, no read access).
-create policy "public can apply"
-  on members for insert
-  to anon
-  with check (true);
+## 2. Create your admin account
 
--- Only signed-in (admin) users can view or edit applications.
-create policy "authenticated can read"
-  on members for select
-  to authenticated
-  using (true);
+1. Go to **Authentication → Users** in Supabase and manually add yourself
+   (email + password).
+2. Back in the **SQL editor**, run (with your real email):
+   ```sql
+   update profiles set is_admin = true, approved = true
+     where email = 'you@example.com';
+   ```
+   (This works because the schema auto-creates a `profiles` row the moment
+   any auth user is created.)
+3. Under **Authentication → Settings**, you can leave sign-ups on — that's
+   how members create their portal login — but if you'd rather gate it
+   further, magic-link sign-in only requires an existing email, no
+   separate "sign-up" toggle to worry about.
+4. Sign in at `/admin.html` with that email + password.
 
-create policy "authenticated can update"
-  on members for update
-  to authenticated
-  using (true);
-```
+## 3. How membership approval works
 
-3. Go to **Authentication > Users** and manually add yourself (email +
-   password) as the one admin account. Turn off public sign-ups under
-   **Authentication > Settings** so no one else can create an account.
-4. Go to **Project Settings > API** and copy the **Project URL** and
-   **anon public key**.
-5. Paste both into [`js/supabase-config.js`](js/supabase-config.js).
+- Someone applies via the public form → lands in the **Applications** tab
+  in admin, status `new`.
+- You review it and set status to `approved` (or `declined`/`contacted`).
+- When that person later visits `/member.html` and signs in with a magic
+  link (just their email, no password), the database automatically
+  matches their email against approved applications and unlocks portal
+  access. If there's no match yet, they see a "pending approval" screen —
+  you can also manually flag someone approved in the admin **Members** tab.
+- **Bulk-importing an existing list**: use the CSV importer in the admin
+  **Applications** tab (columns: `name`, `email`, `company` — header row
+  required). Imported rows land as pre-approved applications, so those
+  people get instant portal access the first time they sign in.
 
-The anon key is meant to be public — the RLS policies above are what
-actually control access (insert-only for the public, read/write only for
-your signed-in admin account).
+## 4. Matches / connections
 
-## 2. Fill in the real content
+Every approved member has to complete a short onboarding form the first
+time they sign in (name, company/occupation, bio, tags) before they can
+access the rest of the portal — that's what feeds the matcher.
 
-- Edit the About paragraph in [`index.html`](index.html) (marked with a
-  `TODO` comment) with the real description of what SKM is.
-- Swap in additional/alternate logo exports in `assets/` if you have them
-  (the current one was pulled from `SKM_Logo.ai`).
+The admin **Matches** tab scores every pair of members by weighted overlap
+across their tags, bio, and company text (exact tag matches count more
+than incidental shared keywords) and surfaces the strongest pairs as
+suggestions, with the specific overlap shown so you can judge each one.
+Nothing is visible to members until you click **Connect** — at that point
+it shows up for both members under "Your connections" in the portal.
 
-## 3. Run it locally
+This is a heuristic (`matchScore` in `js/admin.js`), not a live AI model —
+it's instant, free, and needs zero extra infrastructure. A genuine
+LLM/embedding-based matcher is a clean future upgrade: add a `pgvector`
+column to `profiles`, a Supabase Edge Function that calls an embeddings
+API (e.g. OpenAI) whenever a profile is saved, and rank matches by cosine
+similarity instead of keyword overlap. That needs an API key and a
+deployed Edge Function, so it's worth doing once the core system's been
+live and tested for a bit.
+
+## 5. Fill in remaining content
+
+- Add real events in the admin **Events** tab once you have some.
+- Merch: `assets/merch/` holds preview images members can browse/search in
+  the portal — swap in real product shots whenever ready.
+
+## 6. Run it locally
 
 No build tools needed — just open `index.html` in a browser, or serve the
-folder:
+folder (e.g. `ruby -run -e httpd . -p 8000` if you don't have Python/Node
+set up — see below) and visit `http://localhost:8000`.
 
-```bash
-python3 -m http.server 8000
-```
+## 7. Deploying updates
 
-then visit `http://localhost:8000`.
-
-## 4. Put it on GitHub + go live
-
-This machine doesn't currently have git/Xcode Command Line Tools
-installed, so the easiest path is GitHub's web uploader (no git needed):
-
-1. Go to https://github.com/new, create a repo (e.g. `skm-website`).
-2. On the new repo page, click **uploading an existing file** and drag in
-   everything from this folder.
-3. Commit to `main`.
-4. Go to **Settings > Pages**, set **Source** to `main` / `/(root)`, save.
-   GitHub gives you a live URL at `https://<username>.github.io/skm-website/`.
-
-If you later install git (`xcode-select --install`, or Homebrew), this
-folder is a normal git repo waiting to happen:
+This site is live at **https://ahmed0728.github.io/SKM-Website/**, source
+at **https://github.com/Ahmed0728/SKM-Website**. This machine doesn't have
+git installed (no Xcode Command Line Tools), so updates so far have gone
+through either GitHub's web uploader or the GitHub API directly with a
+short-lived, narrowly-scoped personal access token. Once git is available,
+this folder can be pushed the normal way:
 
 ```bash
 git init
 git add .
-git commit -m "Initial SKM site"
+git commit -m "Update"
 git branch -M main
-git remote add origin https://github.com/<username>/skm-website.git
+git remote add origin https://github.com/Ahmed0728/SKM-Website.git
 git push -u origin main
 ```
-
-## Admin dashboard
-
-Visit `/admin.html`, sign in with the one admin account you created in
-step 1.3. From there you can see every applicant, change their status
-(new / contacted / approved / declined), and leave notes — that's the
-"connect them on the back end" piece.
-
-## Later: Merch tab
-
-Not built yet. When you're ready, add a `#merch` section to `index.html`
-+ a nav link, same pattern as `#about`/`#apply`.
