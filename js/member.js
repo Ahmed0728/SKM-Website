@@ -103,6 +103,7 @@ document.getElementById("onboarding-form").addEventListener("submit", async (e) 
   const updates = {
     name: document.getElementById("onboard-name").value.trim(),
     company: document.getElementById("onboard-company").value.trim(),
+    industry: document.getElementById("onboard-industry").value,
     bio: document.getElementById("onboard-bio").value.trim(),
     tags,
     directory_visible: document.getElementById("onboard-visible").checked,
@@ -196,7 +197,7 @@ async function loadDirectory() {
   const empty = document.getElementById("directory-empty");
   const { data, error } = await supabaseClient
     .from("profiles")
-    .select("id, name, company, tags")
+    .select("id, name, company, industry, tags")
     .eq("approved", true)
     .eq("directory_visible", true)
     .neq("id", currentProfile.id)
@@ -213,7 +214,7 @@ async function loadDirectory() {
     <div class="card">
       <div class="card__body">
         <h3 class="card__title">${escapeHtml(m.name || "Member")}</h3>
-        ${m.company ? `<p class="card__meta">${escapeHtml(m.company)}</p>` : ""}
+        ${m.company ? `<p class="card__meta">${escapeHtml(m.company)}${m.industry ? ` · ${escapeHtml(m.industry)}` : ""}</p>` : m.industry ? `<p class="card__meta">${escapeHtml(m.industry)}</p>` : ""}
         ${renderTags(m.tags)}
       </div>
     </div>
@@ -275,6 +276,7 @@ document.getElementById("merch-search").addEventListener("input", (e) => loadMer
 function fillProfileForm(profile) {
   document.getElementById("profile-name").value = profile.name || "";
   document.getElementById("profile-company").value = profile.company || "";
+  document.getElementById("profile-industry").value = profile.industry || "";
   document.getElementById("profile-bio").value = profile.bio || "";
   document.getElementById("profile-tags").value = (profile.tags || []).join(", ");
   document.getElementById("profile-visible").checked = !!profile.directory_visible;
@@ -293,6 +295,7 @@ document.getElementById("profile-form").addEventListener("submit", async (e) => 
   const updates = {
     name: document.getElementById("profile-name").value.trim(),
     company: document.getElementById("profile-company").value.trim() || null,
+    industry: document.getElementById("profile-industry").value || null,
     bio: document.getElementById("profile-bio").value.trim() || null,
     tags,
     directory_visible: document.getElementById("profile-visible").checked,
