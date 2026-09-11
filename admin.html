@@ -8,7 +8,7 @@
   <link rel="icon" href="assets/icon-white.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Fraunces:ital,opsz,wght@0,9..144,500;1,9..144,500&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
@@ -35,29 +35,124 @@
   <div id="dashboard-view" class="admin-shell" hidden>
     <div class="admin-maxw">
       <div class="admin-header">
-        <h1>Members</h1>
+        <h1>Admin</h1>
         <button class="btn btn--ghost" id="signout-btn">Sign Out</button>
       </div>
 
-      <div class="admin-stats" id="stats"></div>
-
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Contact</th>
-              <th>Referred by</th>
-              <th>Message</th>
-              <th>Status</th>
-              <th>Notes</th>
-              <th>Applied</th>
-            </tr>
-          </thead>
-          <tbody id="members-body"></tbody>
-        </table>
-        <div class="empty-state" id="empty-state" hidden>No applications yet.</div>
+      <div class="tabs">
+        <button class="tab-btn is-active" data-tab="applications">Applications</button>
+        <button class="tab-btn" data-tab="members">Members</button>
+        <button class="tab-btn" data-tab="events">Events</button>
+        <button class="tab-btn" data-tab="matches">Matches</button>
+        <button class="tab-btn" data-tab="import">Import</button>
       </div>
+
+      <!-- Applications -->
+      <div class="tab-panel" data-panel="applications">
+        <div class="admin-stats" id="stats"></div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Contact</th>
+                <th>Company / Occupation</th>
+                <th>Referred by</th>
+                <th>Message</th>
+                <th>Status</th>
+                <th>Notes</th>
+                <th>Applied</th>
+              </tr>
+            </thead>
+            <tbody id="applications-body"></tbody>
+          </table>
+          <div class="empty-state" id="applications-empty" hidden>No applications yet.</div>
+        </div>
+      </div>
+
+      <!-- Members (real portal accounts) -->
+      <div class="tab-panel" data-panel="members" hidden>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Company</th>
+                <th>Tags</th>
+                <th>Approved</th>
+                <th>In Directory</th>
+                <th>Admin</th>
+                <th>Joined</th>
+              </tr>
+            </thead>
+            <tbody id="members-body"></tbody>
+          </table>
+          <div class="empty-state" id="members-empty" hidden>No one has signed in to the member portal yet.</div>
+        </div>
+      </div>
+
+      <!-- Events -->
+      <div class="tab-panel" data-panel="events" hidden>
+        <form class="form" id="event-form" style="max-width:520px;margin-bottom:48px;">
+          <div class="field">
+            <label for="event-title">Title</label>
+            <input type="text" id="event-title" required />
+          </div>
+          <div class="field">
+            <label for="event-starts">Date &amp; time</label>
+            <input type="datetime-local" id="event-starts" />
+          </div>
+          <div class="field">
+            <label for="event-location">Location</label>
+            <input type="text" id="event-location" />
+          </div>
+          <div class="field">
+            <label for="event-image">Image URL (optional)</label>
+            <input type="url" id="event-image" />
+          </div>
+          <div class="field">
+            <label for="event-description">Description</label>
+            <textarea id="event-description"></textarea>
+          </div>
+          <div>
+            <button type="submit" class="btn form__submit" id="event-save-btn">Post Event</button>
+            <p class="form__status" id="event-status"></p>
+          </div>
+        </form>
+        <div class="card-grid" id="events-list"></div>
+        <div class="empty-state" id="events-empty" hidden>No events posted yet.</div>
+      </div>
+
+      <!-- Matches -->
+      <div class="tab-panel" data-panel="matches" hidden>
+        <p style="color:var(--fg-dim);max-width:58ch;margin-bottom:28px;">
+          Suggested pairs based on overlapping profile tags. Nothing is
+          visible to members until you connect them.
+        </p>
+        <div id="suggested-matches"></div>
+        <div class="empty-state" id="matches-empty" hidden>No suggested matches right now — members need tags on their profiles first.</div>
+
+        <h2 class="section__title" style="font-size:18px;margin-top:48px;">Existing connections</h2>
+        <div id="existing-connections"></div>
+        <div class="empty-state" id="connections-empty" hidden>No connections made yet.</div>
+      </div>
+
+      <!-- Import -->
+      <div class="tab-panel" data-panel="import" hidden>
+        <p style="color:var(--fg-dim);max-width:58ch;margin-bottom:24px;">
+          Bulk-add your existing contact list as pre-approved applications.
+          CSV with a header row: <code>name,email,company</code> (company
+          optional). They'll get instant member portal access the first
+          time they sign in with that email.
+        </p>
+        <div class="file-input-wrap">
+          <input type="file" id="import-file" accept=".csv" />
+        </div>
+        <button class="btn form__submit" id="import-btn">Import</button>
+        <p class="form__status" id="import-status"></p>
+      </div>
+
     </div>
   </div>
 
