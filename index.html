@@ -8,7 +8,7 @@
   <link rel="icon" href="assets/icon-white.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Fraunces:ital,opsz,wght@0,9..144,500;1,9..144,500&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
@@ -18,14 +18,14 @@
     <div class="nav__links">
       <a href="#about">About</a>
       <a href="#apply">Apply</a>
+      <a href="member.html">Members</a>
     </div>
   </nav>
 
   <header class="hero" id="top">
     <img class="hero__mark" src="assets/logo-white.png" alt="SKM — Say Know More" />
-    <h1 class="hero__tagline">If you know, <em>you know.</em></h1>
+    <h1 class="hero__tagline">The best connections <em>don't end when the night does.</em></h1>
     <a href="#apply" class="btn">Apply for Membership</a>
-    <span class="scroll-hint">Scroll</span>
   </header>
 
   <section id="about">
@@ -33,16 +33,10 @@
       <p class="section__label">About</p>
       <h2 class="section__title">What SKM is.</h2>
       <p>
-        SKM — Say Know More — is a community for people shaping their fields
-        by moving with intention, purpose, and a shared value for connection.
-        It brings together the doers — the people building, creating, and
-        influencing — and gives them a space to connect, exchange value, and
-        stay plugged into one another.
-      </p>
-      <p>
-        A lot of networking today feels transactional. SKM is built to be
-        something more genuine: intentional about who's in the room, and how
-        the space is curated, so real action can be taken after you leave.
+        SKM is a community for the doers — the people building, creating,
+        and influencing — who move with intention and value real connection
+        over transactional networking. We're intentional about who's in the
+        room, so what starts here doesn't end when the night does.
         Membership is by application only.
       </p>
     </div>
@@ -71,12 +65,17 @@
         </div>
 
         <div class="field">
+          <label for="company">Company or occupation</label>
+          <input type="text" id="company" name="company" />
+        </div>
+
+        <div class="field">
           <label for="referral">Referred by (optional)</label>
           <input type="text" id="referral" name="referral" />
         </div>
 
         <div class="field">
-          <label for="message">Why do you want in?</label>
+          <label for="message">Say something we should know.</label>
           <textarea id="message" name="message" required></textarea>
         </div>
 
