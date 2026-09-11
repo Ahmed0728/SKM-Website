@@ -48,9 +48,11 @@ create table if not exists profiles (
   directory_visible boolean not null default true,
   is_admin boolean not null default false,
   onboarded boolean not null default false,
+  payment_status text not null default 'pending', -- pending | active | canceled
   created_at timestamptz not null default now()
 );
 alter table profiles add column if not exists onboarded boolean not null default false;
+alter table profiles add column if not exists payment_status text not null default 'pending';
 alter table profiles add column if not exists industry text;
 
 alter table profiles enable row level security;
@@ -92,6 +94,7 @@ begin
   if not is_admin() then
     new.is_admin := old.is_admin;
     new.approved := old.approved;
+    new.payment_status := old.payment_status;
   end if;
   return new;
 end;
