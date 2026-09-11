@@ -17,7 +17,7 @@
     <a href="index.html"><img class="nav__mark" src="assets/icon-white.png" alt="SKM" /></a>
   </nav>
 
-  <!-- Logged out: request a magic link -->
+  <!-- Logged out: sign in or create an account -->
   <div id="login-view" class="admin-login">
     <h1 class="section__title">Members</h1>
     <form class="form" id="login-form">
@@ -25,8 +25,13 @@
         <label for="login-email">Email</label>
         <input type="email" id="login-email" required autocomplete="email" />
       </div>
+      <div class="field">
+        <label for="login-password">Password</label>
+        <input type="password" id="login-password" required minlength="6" autocomplete="current-password" />
+      </div>
       <div>
-        <button type="submit" class="btn form__submit" id="login-btn">Send Magic Link</button>
+        <button type="submit" class="btn form__submit" id="login-btn">Sign In</button>
+        <button type="button" class="btn btn--ghost" id="signup-btn" style="margin-left:12px;padding:14px 28px;">First time? Create account</button>
         <p class="form__status" id="login-status"></p>
       </div>
     </form>
@@ -56,10 +61,6 @@
           <input type="text" id="onboard-name" required />
         </div>
         <div class="field">
-          <label for="onboard-company">Company / occupation</label>
-          <input type="text" id="onboard-company" required />
-        </div>
-        <div class="field">
           <label for="onboard-industry">Industry</label>
           <select id="onboard-industry" required>
             <option value="" disabled selected>Select one</option>
@@ -68,12 +69,14 @@
             <option>Fashion</option>
             <option>Media &amp; Entertainment</option>
             <option>Art &amp; Culture</option>
-            <option>Tech &amp; Startups</option>
-            <option>Finance &amp; Investing</option>
-            <option>Hospitality &amp; Nightlife</option>
-            <option>Marketing &amp; Brand</option>
+            <option>Influencer / Agency</option>
+            <option>Marketing</option>
             <option>Other</option>
           </select>
+        </div>
+        <div class="field">
+          <label for="onboard-company">Company / occupation</label>
+          <input type="text" id="onboard-company" required />
         </div>
         <div class="field">
           <label for="onboard-bio">Short bio</label>
@@ -143,10 +146,6 @@
             <input type="text" id="profile-name" required />
           </div>
           <div class="field">
-            <label for="profile-company">Company / occupation</label>
-            <input type="text" id="profile-company" />
-          </div>
-          <div class="field">
             <label for="profile-industry">Industry</label>
             <select id="profile-industry">
               <option value="" disabled>Select one</option>
@@ -155,12 +154,14 @@
               <option>Fashion</option>
               <option>Media &amp; Entertainment</option>
               <option>Art &amp; Culture</option>
-              <option>Tech &amp; Startups</option>
-              <option>Finance &amp; Investing</option>
-              <option>Hospitality &amp; Nightlife</option>
-              <option>Marketing &amp; Brand</option>
+              <option>Influencer / Agency</option>
+              <option>Marketing</option>
               <option>Other</option>
             </select>
+          </div>
+          <div class="field">
+            <label for="profile-company">Company / occupation</label>
+            <input type="text" id="profile-company" />
           </div>
           <div class="field">
             <label for="profile-bio">Short bio</label>
