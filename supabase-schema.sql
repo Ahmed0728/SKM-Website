@@ -49,12 +49,12 @@ alter table profiles enable row level security;
 -- Helper functions (security definer so they can check profiles without
 -- recursing into the RLS policies that call them).
 create or replace function is_admin() returns boolean as $$
-  select coalesce((select is_admin from profiles where id = auth.uid()), false);
-$$ language sql security definer stable;
+  select coalesce((select is_admin from public.profiles where id = auth.uid()), false);
+$$ language sql security definer stable set search_path = public;
 
 create or replace function is_approved_member() returns boolean as $$
-  select coalesce((select approved from profiles where id = auth.uid()), false);
-$$ language sql security definer stable;
+  select coalesce((select approved from public.profiles where id = auth.uid()), false);
+$$ language sql security definer stable set search_path = public;
 
 -- Now that the helpers exist, lock down the applications table properly:
 drop policy if exists "authenticated can read" on members;
@@ -86,7 +86,7 @@ begin
   end if;
   return new;
 end;
-$$ language plpgsql security definer;
+$$ language plpgsql security definer set search_path = public;
 
 drop trigger if exists profiles_guard on profiles;
 create trigger profiles_guard before update on profiles
@@ -96,25 +96,28 @@ create trigger profiles_guard before update on profiles
 -- Auto-approves them if their email matches an approved application.
 create or replace function handle_new_user() returns trigger as $$
 declare
-  matched record;
+  matched_name text;
+  matched_company text;
+  was_matched boolean;
 begin
-  select * into matched from members
+  select name, company into matched_name, matched_company from public.members
     where lower(email) = lower(new.email) and status = 'approved'
     order by created_at desc limit 1;
+  was_matched := found;
 
-  insert into profiles (id, email, name, company, approved)
+  insert into public.profiles (id, email, name, company, approved)
   values (
     new.id,
     new.email,
-    coalesce(matched.name, split_part(new.email, '@', 1)),
-    matched.company,
-    matched is not null
+    coalesce(matched_name, split_part(new.email, '@', 1)),
+    matched_company,
+    was_matched
   )
   on conflict (id) do nothing;
 
   return new;
 end;
-$$ language plpgsql security definer;
+$$ language plpgsql security definer set search_path = public;
 
 drop trigger if exists on_auth_user_created on auth.users;
 create trigger on_auth_user_created
