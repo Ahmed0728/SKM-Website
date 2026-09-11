@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Members — SKM</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <link rel="icon" href="assets/icon-white.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Fraunces:ital,opsz,wght@0,9..144,500;1,9..144,500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+  <!-- Logged out: request a magic link -->
+  <div id="login-view" class="admin-login">
+    <img class="hero__mark" src="assets/logo-white.png" alt="SKM" />
+    <h1 class="section__title">Members</h1>
+    <form class="form" id="login-form">
+      <div class="field">
+        <label for="login-email">Email</label>
+        <input type="email" id="login-email" required autocomplete="email" />
+      </div>
+      <div>
+        <button type="submit" class="btn form__submit" id="login-btn">Send Magic Link</button>
+        <p class="form__status" id="login-status"></p>
+      </div>
+    </form>
+  </div>
+
+  <!-- Signed in but not yet approved -->
+  <div id="pending-view" class="admin-login" hidden>
+    <img class="hero__mark" src="assets/logo-white.png" alt="SKM" />
+    <h1 class="section__title">You're on the list.</h1>
+    <p style="color:var(--fg-dim);">
+      Your application is still being reviewed. Check back once you've
+      heard from us.
+    </p>
+    <button class="btn btn--ghost form__submit" id="pending-signout-btn">Sign Out</button>
+  </div>
+
+  <!-- Approved, but hasn't completed their profile yet — required before portal access -->
+  <div id="onboarding-view" class="admin-shell" hidden>
+    <div class="admin-maxw" style="max-width:520px;">
+      <img class="hero__mark" src="assets/logo-white.png" alt="SKM" style="width:180px;margin-bottom:28px;" />
+      <h1 class="section__title">You're in. One last step.</h1>
+      <p style="color:var(--fg-dim);max-width:52ch;margin-bottom:28px;">
+        Tell us a bit about yourself so we can connect you with the right
+        people — this is what unlocks the rest of the portal.
+      </p>
+      <form class="form" id="onboarding-form">
+        <div class="field">
+          <label for="onboard-name">Name</label>
+          <input type="text" id="onboard-name" required />
+        </div>
+        <div class="field">
+          <label for="onboard-company">Company / occupation</label>
+          <input type="text" id="onboard-company" required />
+        </div>
+        <div class="field">
+          <label for="onboard-bio">Short bio</label>
+          <textarea id="onboard-bio" required></textarea>
+        </div>
+        <div class="field">
+          <label for="onboard-tags">Tags — what you do, what you're looking for</label>
+          <input type="text" id="onboard-tags" required placeholder="e.g. fashion, investing, looking for a co-founder" />
+        </div>
+        <div class="field" style="display:flex;flex-direction:row;align-items:center;gap:10px;">
+          <input type="checkbox" id="onboard-visible" style="width:auto;" checked />
+          <label for="onboard-visible" style="text-transform:none;letter-spacing:0;font-size:14px;">Show me in the member directory</label>
+        </div>
+        <div>
+          <button type="submit" class="btn form__submit" id="onboard-save-btn">Enter SKM</button>
+          <p class="form__status" id="onboard-status"></p>
+        </div>
+      </form>
+      <button class="btn btn--ghost" id="onboard-signout-btn" style="margin-top:24px;padding:10px 20px;">Sign Out</button>
+    </div>
+  </div>
+
+  <!-- Approved: the portal -->
+  <div id="portal-view" class="admin-shell" hidden>
+    <div class="admin-maxw">
+      <div class="admin-header">
+        <h1>Welcome<span id="portal-name"></span>.</h1>
+        <button class="btn btn--ghost" id="signout-btn">Sign Out</button>
+      </div>
+
+      <div class="tabs">
+        <button class="tab-btn is-active" data-tab="events">Events</button>
+        <button class="tab-btn" data-tab="directory">Directory</button>
+        <button class="tab-btn" data-tab="connections">Your Connections</button>
+        <button class="tab-btn" data-tab="merch">Merch</button>
+        <button class="tab-btn" data-tab="profile">Your Profile</button>
+      </div>
+
+      <div class="tab-panel" data-panel="events">
+        <div class="card-grid" id="events-list"></div>
+        <div class="empty-state" id="events-empty" hidden>No upcoming events yet — check back soon.</div>
+      </div>
+
+      <div class="tab-panel" data-panel="directory" hidden>
+        <div class="card-grid" id="directory-list"></div>
+        <div class="empty-state" id="directory-empty" hidden>No other members visible yet.</div>
+      </div>
+
+      <div class="tab-panel" data-panel="connections" hidden>
+        <div class="card-grid" id="connections-list"></div>
+        <div class="empty-state" id="connections-empty" hidden>No connections yet — once the admin connects you with someone, it'll show up here.</div>
+      </div>
+
+      <div class="tab-panel" data-panel="merch" hidden>
+        <input type="text" class="notes-input" id="merch-search" placeholder="Search merch…" style="max-width:320px;margin-bottom:24px;" />
+        <div class="card-grid" id="merch-list"></div>
+      </div>
+
+      <div class="tab-panel" data-panel="profile" hidden>
+        <p style="color:var(--fg-dim);max-width:52ch;margin-bottom:28px;">
+          This is what other members and the admin see. Tags help us match
+          you with the right people.
+        </p>
+        <form class="form" id="profile-form" style="max-width:480px;">
+          <div class="field">
+            <label for="profile-name">Name</label>
+            <input type="text" id="profile-name" required />
+          </div>
+          <div class="field">
+            <label for="profile-company">Company / occupation</label>
+            <input type="text" id="profile-company" />
+          </div>
+          <div class="field">
+            <label for="profile-bio">Short bio</label>
+            <textarea id="profile-bio"></textarea>
+          </div>
+          <div class="field">
+            <label for="profile-tags">Tags (comma-separated — what you do, what you're looking for)</label>
+            <input type="text" id="profile-tags" placeholder="e.g. fashion, investing, looking for a co-founder" />
+          </div>
+          <div class="field" style="display:flex;flex-direction:row;align-items:center;gap:10px;">
+            <input type="checkbox" id="profile-visible" style="width:auto;" />
+            <label for="profile-visible" style="text-transform:none;letter-spacing:0;font-size:14px;">Show me in the member directory</label>
+          </div>
+          <div>
+            <button type="submit" class="btn form__submit" id="profile-save-btn">Save</button>
+            <p class="form__status" id="profile-status"></p>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script src="js/supabase-config.js"></script>
+  <script src="js/member.js"></script>
+</body>
+</html>
