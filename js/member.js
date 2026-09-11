@@ -64,30 +64,66 @@ async function loadProfile(user) {
   loadMerch();
 }
 
+const signupBtn = document.getElementById("signup-btn");
+
 loginForm.addEventListener("submit", async (e) => {
   e.preventDefault();
   loginBtn.disabled = true;
-  loginBtn.textContent = "Sending…";
+  loginBtn.textContent = "Signing in…";
   loginStatus.textContent = "";
   loginStatus.removeAttribute("data-state");
 
   const email = document.getElementById("login-email").value.trim();
-  const { error } = await supabaseClient.auth.signInWithOtp({
-    email,
-    options: { emailRedirectTo: window.location.href },
-  });
+  const password = document.getElementById("login-password").value;
+  const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
 
   loginBtn.disabled = false;
-  loginBtn.textContent = "Send Magic Link";
+  loginBtn.textContent = "Sign In";
 
   if (error) {
-    loginStatus.textContent = "Something went wrong. Try again.";
+    loginStatus.textContent = "Incorrect email or password.";
     loginStatus.setAttribute("data-state", "error");
     return;
   }
 
-  loginStatus.textContent = "Check your email for a sign-in link.";
-  loginStatus.setAttribute("data-state", "ok");
+  await loadProfile(data.user);
+});
+
+signupBtn.addEventListener("click", async () => {
+  const email = document.getElementById("login-email").value.trim();
+  const password = document.getElementById("login-password").value;
+
+  if (!email || password.length < 6) {
+    loginStatus.textContent = "Enter your email and a password (6+ characters) first.";
+    loginStatus.setAttribute("data-state", "error");
+    return;
+  }
+
+  signupBtn.disabled = true;
+  signupBtn.textContent = "Creating…";
+  loginStatus.textContent = "";
+  loginStatus.removeAttribute("data-state");
+
+  const { data, error } = await supabaseClient.auth.signUp({ email, password });
+
+  signupBtn.disabled = false;
+  signupBtn.textContent = "First time? Create account";
+
+  if (error) {
+    loginStatus.textContent = error.message.includes("already registered")
+      ? "That email already has an account — sign in instead."
+      : "Something went wrong. Try again.";
+    loginStatus.setAttribute("data-state", "error");
+    return;
+  }
+
+  if (!data.session) {
+    loginStatus.textContent = "Account created — check your email to confirm, then sign in.";
+    loginStatus.setAttribute("data-state", "ok");
+    return;
+  }
+
+  await loadProfile(data.user);
 });
 
 document.getElementById("onboarding-form").addEventListener("submit", async (e) => {
