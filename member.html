@@ -47,6 +47,22 @@
     <button class="btn btn--ghost form__submit" id="pending-signout-btn">Sign Out</button>
   </div>
 
+  <!-- Approved, but membership isn't active yet -->
+  <div id="payment-view" class="admin-login" hidden>
+    <h1 class="section__title">You're approved.</h1>
+    <p style="color:var(--fg-dim);max-width:44ch;margin:0 auto 32px;">
+      Last step: activate your membership — <strong style="color:var(--fg);">$35/month</strong>.
+      You'll get access to events, the member directory, and everyone
+      already in the room.
+    </p>
+    <a href="#" id="payment-link" class="btn form__submit" target="_blank" rel="noopener">Activate Membership</a>
+    <div style="margin-top:16px;">
+      <button class="btn btn--ghost" id="payment-refresh-btn" style="padding:10px 20px;">Already paid? Check again</button>
+    </div>
+    <p class="form__status" id="payment-status"></p>
+    <button class="btn btn--ghost" id="payment-signout-btn" style="margin-top:24px;padding:10px 20px;">Sign Out</button>
+  </div>
+
   <!-- Approved, but hasn't completed their profile yet — required before portal access -->
   <div id="onboarding-view" class="admin-shell" hidden>
     <div class="admin-maxw" style="max-width:520px;">
