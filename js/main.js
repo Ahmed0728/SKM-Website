@@ -12,6 +12,7 @@ form.addEventListener("submit", async (e) => {
     email: form.email.value.trim(),
     phone: form.phone.value.trim() || null,
     company: form.company.value.trim() || null,
+    industry: form.industry.value || null,
     referral: form.referral.value.trim() || null,
     message: form.message.value.trim(),
     status: "new",
