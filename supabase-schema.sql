@@ -22,8 +22,13 @@ alter table members add column if not exists company text;
 
 alter table members enable row level security;
 
+-- Scoped "to public" (not just "to anon") so submitting the form still
+-- works even if the visitor's browser happens to have an active login
+-- session (e.g. an admin testing the form while signed in) — logged-in
+-- requests authenticate as "authenticated", not "anon".
 drop policy if exists "public can apply" on members;
-create policy "public can apply" on members for insert to anon with check (true);
+drop policy if exists "anyone can apply" on members;
+create policy "anyone can apply" on members for insert to public with check (true);
 
 -- ============================================================
 -- Profiles (real member accounts, created automatically on signup)
