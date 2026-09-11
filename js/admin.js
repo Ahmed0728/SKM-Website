@@ -125,7 +125,7 @@ function renderApplicationsTable(members) {
         <div>${escapeHtml(m.email)}</div>
         ${m.phone ? `<div>${escapeHtml(m.phone)}</div>` : ""}
       </td>
-      <td>${m.company ? escapeHtml(m.company) : "—"}</td>
+      <td>${m.company ? escapeHtml(m.company) : "—"}${m.industry ? `<div class="card__meta">${escapeHtml(m.industry)}</div>` : ""}</td>
       <td>${m.referral ? escapeHtml(m.referral) : "—"}</td>
       <td style="max-width:260px;">${escapeHtml(m.message || "")}</td>
       <td>
@@ -191,7 +191,7 @@ async function loadMembers() {
     <tr data-id="${p.id}">
       <td class="cell-name">${escapeHtml(p.name || "—")}</td>
       <td>${escapeHtml(p.email)}</td>
-      <td>${p.company ? escapeHtml(p.company) : "—"}</td>
+      <td>${p.company ? escapeHtml(p.company) : "—"}${p.industry ? `<div class="card__meta">${escapeHtml(p.industry)}</div>` : ""}</td>
       <td>${(p.tags || []).map((t) => `<span class="tag-pill">${escapeHtml(t)}</span>`).join(" ")}</td>
       <td><input type="checkbox" data-field="approved" ${p.approved ? "checked" : ""} /></td>
       <td><input type="checkbox" data-field="directory_visible" ${p.directory_visible ? "checked" : ""} /></td>
@@ -300,7 +300,7 @@ async function loadMatches() {
   const existingEl = document.getElementById("existing-connections");
   const connectionsEmpty = document.getElementById("connections-empty");
 
-  const approved = allProfiles.filter((p) => p.approved && ((p.tags && p.tags.length) || p.bio));
+  const approved = allProfiles.filter((p) => p.approved && ((p.tags && p.tags.length) || p.bio || p.industry));
 
   const { data: connections, error } = await supabaseClient.from("connections").select("*");
   if (error) console.error(error);
@@ -399,13 +399,15 @@ function matchScore(a, b) {
   const aTags = (a.tags || []).map((t) => t.toLowerCase());
   const bTags = (b.tags || []).map((t) => t.toLowerCase());
   const sharedTags = aTags.filter((t) => bTags.includes(t));
+  const sameIndustry = a.industry && b.industry && a.industry === b.industry;
 
   const aWords = new Set([...tokenize(a.bio), ...tokenize(a.company), ...aTags.flatMap(tokenize)]);
   const bWords = new Set([...tokenize(b.bio), ...tokenize(b.company), ...bTags.flatMap(tokenize)]);
   const sharedWords = [...aWords].filter((w) => bWords.has(w) && !sharedTags.includes(w));
 
-  const score = sharedTags.length * 3 + sharedWords.length;
+  const score = sharedTags.length * 3 + (sameIndustry ? 2 : 0) + sharedWords.length;
   const reasons = [];
+  if (sameIndustry) reasons.push(`both in ${a.industry}`);
   if (sharedTags.length) reasons.push(`shared tags: ${sharedTags.join(", ")}`);
   if (sharedWords.length) reasons.push(`shared keywords: ${sharedWords.slice(0, 5).join(", ")}`);
 
