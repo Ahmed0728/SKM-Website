@@ -11,7 +11,7 @@
   --fg-faint: #6b6a63;
   --line: #232320;
   --radius: 2px;
-  --maxw: 720px;
+  --maxw: 820px;
   --font: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
@@ -160,8 +160,8 @@ section {
 }
 
 .section__label {
-  font-size: 11px;
-  letter-spacing: 0.24em;
+  font-size: 14px;
+  letter-spacing: 0.2em;
   text-transform: uppercase;
   color: var(--fg);
   margin: 0 0 24px;
@@ -169,16 +169,17 @@ section {
 
 .section__title {
   font-family: "Fraunces", var(--font);
-  font-size: clamp(24px, 4vw, 32px);
+  font-size: clamp(30px, 5vw, 44px);
   font-weight: 500;
-  margin: 0 0 28px;
+  margin: 0 0 32px;
   letter-spacing: -0.01em;
 }
 
-.section p {
+section p {
   color: var(--fg-dim);
-  font-size: 16px;
-  max-width: 58ch;
+  font-size: clamp(17px, 2vw, 19px);
+  line-height: 1.7;
+  max-width: 62ch;
 }
 
 .reveal {
