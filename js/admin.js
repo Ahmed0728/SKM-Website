@@ -194,6 +194,7 @@ async function loadMembers() {
       <td>${p.company ? escapeHtml(p.company) : "—"}${p.industry ? `<div class="card__meta">${escapeHtml(p.industry)}</div>` : ""}</td>
       <td>${(p.tags || []).map((t) => `<span class="tag-pill">${escapeHtml(t)}</span>`).join(" ")}</td>
       <td><input type="checkbox" data-field="approved" ${p.approved ? "checked" : ""} /></td>
+      <td><input type="checkbox" data-field="payment_status" ${p.payment_status === "active" ? "checked" : ""} /></td>
       <td><input type="checkbox" data-field="directory_visible" ${p.directory_visible ? "checked" : ""} /></td>
       <td><input type="checkbox" data-field="is_admin" ${p.is_admin ? "checked" : ""} /></td>
       <td>${new Date(p.created_at).toLocaleDateString()}</td>
@@ -209,7 +210,8 @@ async function updateProfileFlag(el) {
   const row = el.closest("tr");
   const id = row.dataset.id;
   const field = el.dataset.field;
-  const { error } = await supabaseClient.from("profiles").update({ [field]: el.checked }).eq("id", id);
+  const value = field === "payment_status" ? (el.checked ? "active" : "pending") : el.checked;
+  const { error } = await supabaseClient.from("profiles").update({ [field]: value }).eq("id", id);
   if (error) {
     console.error(error);
     el.checked = !el.checked;
