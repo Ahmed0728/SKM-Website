@@ -12,6 +12,7 @@ create table if not exists members (
   email text not null,
   phone text,
   company text,
+  industry text,
   referral text,
   message text,
   status text not null default 'new', -- new | contacted | approved | declined
@@ -19,6 +20,7 @@ create table if not exists members (
   created_at timestamptz not null default now()
 );
 alter table members add column if not exists company text;
+alter table members add column if not exists industry text;
 
 alter table members enable row level security;
 
@@ -39,6 +41,7 @@ create table if not exists profiles (
   email text not null,
   name text,
   company text,
+  industry text,
   tags text[] not null default '{}',
   bio text,
   approved boolean not null default false,
@@ -48,6 +51,7 @@ create table if not exists profiles (
   created_at timestamptz not null default now()
 );
 alter table profiles add column if not exists onboarded boolean not null default false;
+alter table profiles add column if not exists industry text;
 
 alter table profiles enable row level security;
 
@@ -103,19 +107,21 @@ create or replace function handle_new_user() returns trigger as $$
 declare
   matched_name text;
   matched_company text;
+  matched_industry text;
   was_matched boolean;
 begin
-  select name, company into matched_name, matched_company from public.members
+  select name, company, industry into matched_name, matched_company, matched_industry from public.members
     where lower(email) = lower(new.email) and status = 'approved'
     order by created_at desc limit 1;
   was_matched := found;
 
-  insert into public.profiles (id, email, name, company, approved)
+  insert into public.profiles (id, email, name, company, industry, approved)
   values (
     new.id,
     new.email,
     coalesce(matched_name, split_part(new.email, '@', 1)),
     matched_company,
+    matched_industry,
     was_matched
   )
   on conflict (id) do nothing;
