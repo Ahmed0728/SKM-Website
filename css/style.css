@@ -176,7 +176,7 @@ section {
 }
 
 section p {
-  color: var(--fg-dim);
+  color: var(--fg);
   font-size: clamp(17px, 2vw, 19px);
   line-height: 1.7;
   max-width: 62ch;
