@@ -13,9 +13,12 @@
 </head>
 <body>
 
+  <nav class="nav">
+    <a href="index.html"><img class="nav__mark" src="assets/icon-white.png" alt="SKM" /></a>
+  </nav>
+
   <!-- Logged out: request a magic link -->
   <div id="login-view" class="admin-login">
-    <img class="hero__mark" src="assets/logo-white.png" alt="SKM" />
     <h1 class="section__title">Members</h1>
     <form class="form" id="login-form">
       <div class="field">
@@ -31,7 +34,6 @@
 
   <!-- Signed in but not yet approved -->
   <div id="pending-view" class="admin-login" hidden>
-    <img class="hero__mark" src="assets/logo-white.png" alt="SKM" />
     <h1 class="section__title">You're on the list.</h1>
     <p style="color:var(--fg-dim);">
       Your application is still being reviewed. Check back once you've
@@ -43,7 +45,6 @@
   <!-- Approved, but hasn't completed their profile yet — required before portal access -->
   <div id="onboarding-view" class="admin-shell" hidden>
     <div class="admin-maxw" style="max-width:520px;">
-      <img class="hero__mark" src="assets/logo-white.png" alt="SKM" style="width:180px;margin-bottom:28px;" />
       <h1 class="section__title">You're in. One last step.</h1>
       <p style="color:var(--fg-dim);max-width:52ch;margin-bottom:28px;">
         Tell us a bit about yourself so we can connect you with the right
@@ -57,6 +58,22 @@
         <div class="field">
           <label for="onboard-company">Company / occupation</label>
           <input type="text" id="onboard-company" required />
+        </div>
+        <div class="field">
+          <label for="onboard-industry">Industry</label>
+          <select id="onboard-industry" required>
+            <option value="" disabled selected>Select one</option>
+            <option>Sports</option>
+            <option>Music</option>
+            <option>Fashion</option>
+            <option>Media &amp; Entertainment</option>
+            <option>Art &amp; Culture</option>
+            <option>Tech &amp; Startups</option>
+            <option>Finance &amp; Investing</option>
+            <option>Hospitality &amp; Nightlife</option>
+            <option>Marketing &amp; Brand</option>
+            <option>Other</option>
+          </select>
         </div>
         <div class="field">
           <label for="onboard-bio">Short bio</label>
@@ -83,10 +100,7 @@
   <div id="portal-view" class="admin-shell" hidden>
     <div class="admin-maxw">
       <div class="admin-header">
-        <div class="admin-header__brand">
-          <img class="nav__mark" src="assets/icon-white.png" alt="SKM" />
-          <h1>Welcome<span id="portal-name"></span>.</h1>
-        </div>
+        <h1>Welcome<span id="portal-name"></span>.</h1>
         <button class="btn btn--ghost" id="signout-btn">Sign Out</button>
       </div>
 
@@ -131,6 +145,22 @@
           <div class="field">
             <label for="profile-company">Company / occupation</label>
             <input type="text" id="profile-company" />
+          </div>
+          <div class="field">
+            <label for="profile-industry">Industry</label>
+            <select id="profile-industry">
+              <option value="" disabled>Select one</option>
+              <option>Sports</option>
+              <option>Music</option>
+              <option>Fashion</option>
+              <option>Media &amp; Entertainment</option>
+              <option>Art &amp; Culture</option>
+              <option>Tech &amp; Startups</option>
+              <option>Finance &amp; Investing</option>
+              <option>Hospitality &amp; Nightlife</option>
+              <option>Marketing &amp; Brand</option>
+              <option>Other</option>
+            </select>
           </div>
           <div class="field">
             <label for="profile-bio">Short bio</label>
