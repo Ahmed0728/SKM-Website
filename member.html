@@ -102,10 +102,6 @@
           <label for="onboard-tags">Tags — what you do, what you're looking for</label>
           <input type="text" id="onboard-tags" required placeholder="e.g. fashion, investing, looking for a co-founder" />
         </div>
-        <div class="field" style="display:flex;flex-direction:row;align-items:center;gap:10px;">
-          <input type="checkbox" id="onboard-visible" style="width:auto;" checked />
-          <label for="onboard-visible" style="text-transform:none;letter-spacing:0;font-size:14px;">Show me in the member directory</label>
-        </div>
         <div>
           <button type="submit" class="btn form__submit" id="onboard-save-btn">Enter SKM</button>
           <p class="form__status" id="onboard-status"></p>
@@ -125,7 +121,6 @@
 
       <div class="tabs">
         <button class="tab-btn is-active" data-tab="events">Events</button>
-        <button class="tab-btn" data-tab="directory">Directory</button>
         <button class="tab-btn" data-tab="connections">Your Connections</button>
         <button class="tab-btn" data-tab="merch">Merch</button>
         <button class="tab-btn" data-tab="profile">Your Profile</button>
@@ -140,11 +135,6 @@
         <div class="empty-state" id="events-empty" hidden>No upcoming events yet — check back soon.</div>
       </div>
 
-      <div class="tab-panel" data-panel="directory" hidden>
-        <div class="card-grid" id="directory-list"></div>
-        <div class="empty-state" id="directory-empty" hidden>No other members visible yet.</div>
-      </div>
-
       <div class="tab-panel" data-panel="connections" hidden>
         <div class="card-grid" id="connections-list"></div>
         <div class="empty-state" id="connections-empty" hidden>No connections yet — once the admin connects you with someone, it'll show up here.</div>
@@ -157,8 +147,8 @@
 
       <div class="tab-panel" data-panel="profile" hidden>
         <p style="color:var(--fg-dim);max-width:52ch;margin-bottom:28px;">
-          This is what other members and the admin see. Tags help us match
-          you with the right people.
+          This is what the SKM team sees. Tags help us match you with the
+          right people.
         </p>
         <form class="form" id="profile-form" style="max-width:480px;">
           <div class="field">
@@ -190,10 +180,6 @@
           <div class="field">
             <label for="profile-tags">Tags (comma-separated — what you do, what you're looking for)</label>
             <input type="text" id="profile-tags" placeholder="e.g. fashion, investing, looking for a co-founder" />
-          </div>
-          <div class="field" style="display:flex;flex-direction:row;align-items:center;gap:10px;">
-            <input type="checkbox" id="profile-visible" style="width:auto;" />
-            <label for="profile-visible" style="text-transform:none;letter-spacing:0;font-size:14px;">Show me in the member directory</label>
           </div>
           <div>
             <button type="submit" class="btn form__submit" id="profile-save-btn">Save</button>
