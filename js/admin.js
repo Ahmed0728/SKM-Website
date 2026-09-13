@@ -223,34 +223,58 @@ async function updateProfileFlag(el) {
 
 // ---------- events ----------
 
-async function loadEvents() {
-  const list = document.getElementById("events-list");
-  const empty = document.getElementById("events-empty");
+let allEvents = [];
+let eventsFilter = "past";
+let eventRsvpCounts = {};
 
+async function loadEvents() {
   const { data, error } = await supabaseClient
     .from("events")
     .select("*")
     .order("starts_at", { ascending: true });
 
-  if (error || !data || !data.length) {
+  if (error) {
+    console.error(error);
+    return;
+  }
+  allEvents = data || [];
+
+  const { data: rsvps, error: rsvpError } = await supabaseClient
+    .from("event_rsvps")
+    .select("event_id");
+
+  eventRsvpCounts = {};
+  if (rsvpError) {
+    console.error(rsvpError);
+  } else {
+    (rsvps || []).forEach((r) => {
+      eventRsvpCounts[r.event_id] = (eventRsvpCounts[r.event_id] || 0) + 1;
+    });
+  }
+
+  renderEvents();
+}
+
+function renderEvents() {
+  const list = document.getElementById("events-list");
+  const empty = document.getElementById("events-empty");
+  const now = new Date();
+
+  let events = allEvents.filter((ev) => {
+    const isPast = ev.starts_at && new Date(ev.starts_at) < now;
+    return eventsFilter === "past" ? isPast : !isPast;
+  });
+  if (eventsFilter === "past") events = [...events].reverse();
+
+  if (!events.length) {
     list.innerHTML = "";
     empty.hidden = false;
+    empty.textContent = eventsFilter === "past" ? "No past events yet." : "No upcoming events posted yet.";
     return;
   }
   empty.hidden = true;
 
-  list.innerHTML = data.map((ev) => `
-    <div class="card">
-      ${ev.image_url ? `<img class="card__image" src="${escapeHtml(ev.image_url)}" alt="" />` : ""}
-      <div class="card__body">
-        <p class="card__meta">${ev.starts_at ? new Date(ev.starts_at).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" }) : "Date TBA"}</p>
-        <h3 class="card__title">${escapeHtml(ev.title)}</h3>
-        ${ev.location ? `<p class="card__meta">${escapeHtml(ev.location)}</p>` : ""}
-        ${ev.description ? `<p class="card__desc">${escapeHtml(ev.description)}</p>` : ""}
-        <button class="btn btn--ghost" style="margin-top:12px;padding:8px 16px;" data-delete-event="${ev.id}">Delete</button>
-      </div>
-    </div>
-  `).join("");
+  list.innerHTML = renderEventGroups(events, { admin: true, rsvpCounts: eventRsvpCounts });
 
   list.querySelectorAll("[data-delete-event]").forEach((btn) => {
     btn.addEventListener("click", async () => {
@@ -260,6 +284,21 @@ async function loadEvents() {
     });
   });
 }
+
+document.querySelectorAll(".events-toggle button").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".events-toggle button").forEach((b) => b.classList.remove("is-active"));
+    btn.classList.add("is-active");
+    eventsFilter = btn.dataset.eventsFilter;
+    renderEvents();
+  });
+});
+
+document.getElementById("add-event-toggle").addEventListener("click", () => {
+  const form = document.getElementById("event-form");
+  form.hidden = !form.hidden;
+  document.getElementById("add-event-toggle").textContent = form.hidden ? "+ Add Event" : "Cancel";
+});
 
 document.getElementById("event-form").addEventListener("submit", async (e) => {
   e.preventDefault();
@@ -292,6 +331,11 @@ document.getElementById("event-form").addEventListener("submit", async (e) => {
   status.textContent = "Posted.";
   status.setAttribute("data-state", "ok");
   document.getElementById("event-form").reset();
+  document.getElementById("event-form").hidden = true;
+  document.getElementById("add-event-toggle").textContent = "+ Add Event";
+  document.querySelectorAll(".events-toggle button").forEach((b) => b.classList.remove("is-active"));
+  document.querySelector('[data-events-filter="upcoming"]').classList.add("is-active");
+  eventsFilter = "upcoming";
   loadEvents();
 });
 
@@ -545,6 +589,39 @@ function parseCsv(text) {
 }
 
 // ---------- helpers ----------
+
+const ICON_PIN = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-7.5 8-13a8 8 0 1 0-16 0c0 5.5 8 13 8 13z"/><circle cx="12" cy="9" r="2.5"/></svg>`;
+const ICON_PEOPLE = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>`;
+
+function renderEventGroups(events, { admin = false, rsvpCounts = {} } = {}) {
+  return events.map((ev) => {
+    const date = ev.starts_at ? new Date(ev.starts_at) : null;
+    const day = date ? date.toLocaleDateString(undefined, { month: "short", day: "numeric" }) : "TBA";
+    const weekday = date ? date.toLocaleDateString(undefined, { weekday: "long" }) : "";
+    const time = date ? date.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" }) : "";
+    const goingCount = rsvpCounts[ev.id] || 0;
+
+    return `
+      <div class="events-timeline__group">
+        <div class="events-timeline__date">
+          <div class="events-timeline__date-day">${escapeHtml(day)}</div>
+          <div class="events-timeline__date-weekday">${escapeHtml(weekday)}</div>
+        </div>
+        <div class="event-card">
+          <div class="event-card__body">
+            ${time ? `<div class="event-card__time">${escapeHtml(time)}</div>` : ""}
+            <h3 class="event-card__title">${escapeHtml(ev.title)}</h3>
+            ${ev.location ? `<div class="event-card__row">${ICON_PIN}<span>${escapeHtml(ev.location)}</span></div>` : ""}
+            ${goingCount > 0 ? `<div class="event-card__row">${ICON_PEOPLE}<span>${goingCount} going</span></div>` : ""}
+            ${ev.description ? `<p class="card__desc">${escapeHtml(ev.description)}</p>` : ""}
+            ${admin ? `<div class="event-card__actions"><button class="btn btn--ghost" style="padding:8px 16px;" data-delete-event="${ev.id}">Delete</button></div>` : ""}
+          </div>
+          ${ev.image_url ? `<img class="event-card__image" src="${escapeHtml(ev.image_url)}" alt="" />` : ""}
+        </div>
+      </div>
+    `;
+  }).join("");
+}
 
 function escapeHtml(str) {
   const div = document.createElement("div");
