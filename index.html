@@ -33,8 +33,9 @@
       <p class="section__label">About</p>
       <h2 class="section__title">What SKM is.</h2>
       <p>
-        SKM is a community for individuals who are shaping sports, music, and culture by
-        moving with intention, purpose, and a shared value for connection.
+        SKM is a community for individuals who are shaping sports, music,
+        and culture by moving with intention, purpose, and a shared value
+        for connection.
         It brings together the doers — the people building, creating, and
         influencing — and gives them a space to connect, exchange value,
         and stay plugged into one another.
@@ -81,7 +82,7 @@
 
         <div class="field">
           <label for="company">Company or occupation</label>
-          <input type="text" id="company" name="company" />
+          <input type="text" id="company" name="company" required />
         </div>
 
         <div class="field">
@@ -101,6 +102,14 @@
       </form>
     </div>
   </section>
+
+  <div class="modal-overlay" id="apply-modal" hidden>
+    <div class="modal">
+      <p class="section__label">Say Know More</p>
+      <h3 class="modal__title">We will review your application.</h3>
+      <button type="button" class="btn form__submit" id="apply-modal-close">Close</button>
+    </div>
+  </div>
 
   <footer>
     <div class="wrap">
