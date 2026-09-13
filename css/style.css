@@ -182,6 +182,11 @@ section p {
   max-width: 62ch;
 }
 
+#about p {
+  font-size: clamp(20px, 2.6vw, 24px);
+  line-height: 1.6;
+}
+
 .reveal {
   opacity: 0;
   transform: translateY(24px);
