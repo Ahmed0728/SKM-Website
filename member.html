@@ -132,7 +132,11 @@
       </div>
 
       <div class="tab-panel" data-panel="events">
-        <div class="card-grid" id="events-list"></div>
+        <div class="events-toggle">
+          <button type="button" class="is-active" data-events-filter="past">Past</button>
+          <button type="button" data-events-filter="upcoming">Upcoming</button>
+        </div>
+        <div id="events-list"></div>
         <div class="empty-state" id="events-empty" hidden>No upcoming events yet — check back soon.</div>
       </div>
 
