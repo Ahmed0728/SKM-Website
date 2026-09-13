@@ -48,7 +48,7 @@ form.addEventListener("submit", async (e) => {
   }
 
   form.reset();
-  statusEl.textContent = "Application received. We'll be in touch.";
+  statusEl.textContent = "Say Know More — we will review your application.";
   statusEl.setAttribute("data-state", "ok");
   submitBtn.textContent = "Submitted";
 });
