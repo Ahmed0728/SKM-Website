@@ -9,9 +9,9 @@ const loginStatus = document.getElementById("login-status");
 const loginBtn = document.getElementById("login-btn");
 
 const MERCH_ITEMS = [
-  { name: "SKM Hoodie", image: "assets/merch/hoodie-pants-five-colorways.png" },
-  { name: "SKM Wide Leg Pullover", image: "assets/merch/pullover-wide-leg-colorways.png" },
-  { name: "SKM Hoodie & Pants Set", image: "assets/merch/hoodie-pants-four-colorways.png" },
+  { name: "SKM Hat", image: null, shopUrl: null },
+  { name: "SKM T-Shirt", image: null, shopUrl: null },
+  { name: "SKM Hoodie", image: "assets/merch/hoodie-pants-five-colorways.png", shopUrl: null },
 ];
 
 let currentProfile = null;
@@ -80,7 +80,6 @@ async function loadProfile(user) {
   document.getElementById("portal-name").textContent = profile.name ? `, ${profile.name}` : "";
   fillProfileForm(profile);
   loadEvents();
-  loadDirectory();
   loadConnections();
   loadMerch();
 }
@@ -163,7 +162,6 @@ document.getElementById("onboarding-form").addEventListener("submit", async (e) 
     industry: document.getElementById("onboard-industry").value,
     bio: document.getElementById("onboard-bio").value.trim(),
     tags,
-    directory_visible: document.getElementById("onboard-visible").checked,
     onboarded: true,
   };
 
@@ -184,7 +182,6 @@ document.getElementById("onboarding-form").addEventListener("submit", async (e) 
   document.getElementById("portal-name").textContent = updates.name ? `, ${updates.name}` : "";
   fillProfileForm(currentProfile);
   loadEvents();
-  loadDirectory();
   loadConnections();
   loadMerch();
 });
@@ -346,37 +343,6 @@ async function toggleRsvp(btn) {
   loadEvents();
 }
 
-// ---------- directory ----------
-
-async function loadDirectory() {
-  const list = document.getElementById("directory-list");
-  const empty = document.getElementById("directory-empty");
-  const { data, error } = await supabaseClient
-    .from("profiles")
-    .select("id, name, company, industry, tags")
-    .eq("approved", true)
-    .eq("directory_visible", true)
-    .neq("id", currentProfile.id)
-    .order("name", { ascending: true });
-
-  if (error || !data || !data.length) {
-    list.innerHTML = "";
-    empty.hidden = false;
-    return;
-  }
-  empty.hidden = true;
-
-  list.innerHTML = data.map((m) => `
-    <div class="card">
-      <div class="card__body">
-        <h3 class="card__title">${escapeHtml(m.name || "Member")}</h3>
-        ${m.company ? `<p class="card__meta">${escapeHtml(m.company)}${m.industry ? ` · ${escapeHtml(m.industry)}` : ""}</p>` : m.industry ? `<p class="card__meta">${escapeHtml(m.industry)}</p>` : ""}
-        ${renderTags(m.tags)}
-      </div>
-    </div>
-  `).join("");
-}
-
 // ---------- connections ----------
 
 async function loadConnections() {
@@ -416,10 +382,12 @@ function loadMerch(filter = "") {
   const items = MERCH_ITEMS.filter((m) => m.name.toLowerCase().includes(filter.toLowerCase()));
   list.innerHTML = items.map((m) => `
     <div class="card">
-      <img class="card__image" src="${m.image}" alt="${escapeHtml(m.name)}" />
+      ${m.image ? `<img class="card__image" src="${escapeHtml(m.image)}" alt="${escapeHtml(m.name)}" />` : ""}
       <div class="card__body">
         <h3 class="card__title">${escapeHtml(m.name)}</h3>
-        <p class="card__meta">Coming soon</p>
+        ${m.shopUrl
+          ? `<a class="btn btn--ghost" style="padding:8px 16px;" href="${escapeHtml(m.shopUrl)}" target="_blank" rel="noopener">Shop</a>`
+          : `<p class="card__meta">Coming soon</p>`}
       </div>
     </div>
   `).join("");
@@ -435,7 +403,6 @@ function fillProfileForm(profile) {
   document.getElementById("profile-industry").value = profile.industry || "";
   document.getElementById("profile-bio").value = profile.bio || "";
   document.getElementById("profile-tags").value = (profile.tags || []).join(", ");
-  document.getElementById("profile-visible").checked = !!profile.directory_visible;
 }
 
 document.getElementById("profile-form").addEventListener("submit", async (e) => {
@@ -454,7 +421,6 @@ document.getElementById("profile-form").addEventListener("submit", async (e) => 
     industry: document.getElementById("profile-industry").value || null,
     bio: document.getElementById("profile-bio").value.trim() || null,
     tags,
-    directory_visible: document.getElementById("profile-visible").checked,
   };
 
   const { error } = await supabaseClient.from("profiles").update(updates).eq("id", currentProfile.id);
@@ -472,7 +438,6 @@ document.getElementById("profile-form").addEventListener("submit", async (e) => 
   document.getElementById("portal-name").textContent = updates.name ? `, ${updates.name}` : "";
   status.textContent = "Saved.";
   status.setAttribute("data-state", "ok");
-  loadDirectory();
 });
 
 // ---------- helpers ----------
@@ -509,11 +474,6 @@ function renderEventGroups(events, { rsvpCounts = {}, myRsvpEventIds = new Set()
       </div>
     `;
   }).join("");
-}
-
-function renderTags(tags) {
-  if (!tags || !tags.length) return "";
-  return `<div class="tag-row">${tags.map((t) => `<span class="tag-pill">${escapeHtml(t)}</span>`).join("")}</div>`;
 }
 
 function escapeHtml(str) {
