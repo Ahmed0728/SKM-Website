@@ -28,6 +28,7 @@ function showDashboard() {
   loadMembers();
   loadEvents();
   loadMatches();
+  loadAttendees();
 }
 
 loginForm.addEventListener("submit", async (e) => {
@@ -475,6 +476,65 @@ document.getElementById("import-btn").addEventListener("click", async () => {
   status.setAttribute("data-state", "ok");
   fileInput.value = "";
   loadApplications();
+});
+
+// ---------- attendees (past event guest list) ----------
+
+let allAttendees = [];
+
+async function loadAttendees() {
+  const { data, error } = await supabaseClient
+    .from("attendees")
+    .select("*")
+    .order("name", { ascending: true });
+
+  if (error) {
+    console.error(error);
+    document.getElementById("attendees-empty").hidden = false;
+    document.getElementById("attendees-empty").textContent = "Couldn't load attendees.";
+    return;
+  }
+
+  allAttendees = data || [];
+  renderAttendeesTable(allAttendees);
+}
+
+function renderAttendeesTable(rows) {
+  const body = document.getElementById("attendees-body");
+  const empty = document.getElementById("attendees-empty");
+
+  if (!rows.length) {
+    body.innerHTML = "";
+    empty.hidden = false;
+    return;
+  }
+  empty.hidden = true;
+
+  body.innerHTML = rows.map((a) => `
+    <tr>
+      <td class="cell-name">${escapeHtml(a.name)}</td>
+      <td>${a.email ? escapeHtml(a.email) : "—"}</td>
+      <td>${a.company ? escapeHtml(a.company) : "—"}</td>
+      <td>${a.title ? escapeHtml(a.title) : "—"}</td>
+      <td>${a.attended_5_12_event ? "Yes" : "No"}</td>
+      <td>${a.attended_6_9_dinner ? "Yes" : "No"}</td>
+    </tr>
+  `).join("");
+}
+
+document.getElementById("attendees-search").addEventListener("input", (e) => {
+  const q = e.target.value.trim().toLowerCase();
+  if (!q) {
+    renderAttendeesTable(allAttendees);
+    return;
+  }
+  const filtered = allAttendees.filter((a) =>
+    (a.name || "").toLowerCase().includes(q) ||
+    (a.company || "").toLowerCase().includes(q) ||
+    (a.email || "").toLowerCase().includes(q) ||
+    (a.title || "").toLowerCase().includes(q)
+  );
+  renderAttendeesTable(filtered);
 });
 
 function parseCsv(text) {
