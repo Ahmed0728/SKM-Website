@@ -16,6 +16,19 @@ document.querySelectorAll(".reveal").forEach((el) => revealObserver.observe(el))
 const form = document.getElementById("apply-form");
 const statusEl = document.getElementById("form-status");
 const submitBtn = document.getElementById("submit-btn");
+const applyModal = document.getElementById("apply-modal");
+const applyModalClose = document.getElementById("apply-modal-close");
+
+function closeApplyModal() {
+  applyModal.hidden = true;
+}
+applyModalClose.addEventListener("click", closeApplyModal);
+applyModal.addEventListener("click", (e) => {
+  if (e.target === applyModal) closeApplyModal();
+});
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && !applyModal.hidden) closeApplyModal();
+});
 
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
@@ -48,7 +61,6 @@ form.addEventListener("submit", async (e) => {
   }
 
   form.reset();
-  statusEl.textContent = "Say Know More — we will review your application.";
-  statusEl.setAttribute("data-state", "ok");
   submitBtn.textContent = "Submitted";
+  applyModal.hidden = false;
 });
