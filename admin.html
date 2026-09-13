@@ -99,7 +99,14 @@
 
       <!-- Events -->
       <div class="tab-panel" data-panel="events" hidden>
-        <form class="form" id="event-form" style="max-width:520px;margin-bottom:48px;">
+        <div class="events-toggle">
+          <button type="button" class="is-active" data-events-filter="past">Past</button>
+          <button type="button" data-events-filter="upcoming">Upcoming</button>
+        </div>
+
+        <button type="button" class="btn btn--ghost" id="add-event-toggle" style="margin-bottom:24px;padding:10px 22px;">+ Add Event</button>
+
+        <form class="form" id="event-form" style="max-width:520px;margin-bottom:48px;" hidden>
           <div class="field">
             <label for="event-title">Title</label>
             <input type="text" id="event-title" required />
@@ -125,8 +132,9 @@
             <p class="form__status" id="event-status"></p>
           </div>
         </form>
-        <div class="card-grid" id="events-list"></div>
-        <div class="empty-state" id="events-empty" hidden>No events posted yet.</div>
+
+        <div id="events-list"></div>
+        <div class="empty-state" id="events-empty" hidden>No past events yet.</div>
       </div>
 
       <!-- Matches -->
